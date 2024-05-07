@@ -9,10 +9,11 @@ import fragment from "../../glsl/planeFragment.glsl"
 
 const Plane = () => {
   const cam = useRef()
+  const mat = useRef()
   const [scene, target] = useMemo(() => {
     const scene = new THREE.Scene()
     scene.background = new THREE.Color("rgb(100,100,100)")
-    const target = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight)
+    const target = new THREE.WebGLRenderTarget(1024, 1024)
     return [scene, target]
   }, [])
 
@@ -20,6 +21,7 @@ const Plane = () => {
     state.gl.setRenderTarget(target)
     state.gl.render(scene, cam.current)
     state.gl.setRenderTarget(null)
+    mat.current.uniforms.u_time.value += 0.001;
   })
 
   return (
@@ -29,6 +31,7 @@ const Plane = () => {
       <mesh >
         <planeGeometry args={[2, 2]} />
         <shaderMaterial
+          ref={mat}
           attach="material"
           args={[
             {
@@ -36,6 +39,8 @@ const Plane = () => {
               fragmentShader: fragment,
               uniforms: {
                 u_texture: { value: target.texture },
+                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                u_time: { value: 0 }
               }
             }
           ]}
