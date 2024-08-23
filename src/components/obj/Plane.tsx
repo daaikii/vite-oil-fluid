@@ -1,15 +1,16 @@
 import * as THREE from "three"
 import { useRef, useMemo } from "react"
-import { useFrame } from "@react-three/fiber"
-import { createPortal } from "@react-three/fiber"
+import { useFrame, createPortal } from "@react-three/fiber"
+import { PerspectiveCamera, ShaderMaterial } from "three"
 
 import Font from "../obj/Font"
 import vertex from "../../glsl/planeVertex.glsl"
 import fragment from "../../glsl/planeFragment.glsl"
 
 const Plane = () => {
-  const cam = useRef()
-  const mat = useRef()
+  const cam = useRef<PerspectiveCamera>(null)
+  const mat = useRef<ShaderMaterial>(null)
+
   const [scene, target] = useMemo(() => {
     const scene = new THREE.Scene()
     scene.background = new THREE.Color("rgb(100,100,100)")
@@ -19,9 +20,11 @@ const Plane = () => {
 
   useFrame((state) => {
     state.gl.setRenderTarget(target)
-    state.gl.render(scene, cam.current)
+    state.gl.render(scene, cam.current!)
     state.gl.setRenderTarget(null)
-    mat.current.uniforms.u_time.value += 0.001;
+    if (mat.current) {
+      mat.current.uniforms.u_time.value += 0.001;
+    }
   })
 
   return (
